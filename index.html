@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>WarsawJS Slides: Template</title>
+    <title>Handling Asynchronous Actions in React-Redux Apps</title>
 
     <meta charset="utf-8"/>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -14,10 +14,11 @@
     <!-- Prism.js -->
     <link rel="stylesheet" href="vendors/prism/prism.css"/>
     <link rel="stylesheet" href="modules/custom-prism.css"/>
+    <link rel="stylesheet" href="modules/mon.css"/>
 </head>
 <body class="shower list">
     <header class="caption">
-        <h1>WarsawJS Slides: Template</h1>
+        <h1>WarsawJS</h1>
         <p>We talk about JavaScript. Each month in Warsaw, Poland.</p>
     </header>
 
@@ -28,292 +29,351 @@
         </div>
         <div class="details">
             <!-- 1. Avatar -->
-            <img src="pictures/my-avatar.jpg" alt="Speaker"/>
+            <img src="pictures/mon-avatar.jpg" alt="Speaker"/>
 
             <!-- 2. Speaker -->
-            <h2>Speaker name</h2>
+            <h2>Monika Glier</h2>
 
             <!-- 3. Presentation title -->
-            <h2><strong>"WarsawJS Slides: Template" [PL/EN]</strong></h2>
+            <h2><strong>Handling Asynchronous Actions in React-Redux Apps</strong></h2>
 
             <!-- 4. Presentation date -->
-            <h2>XXXX-XX-XX</h2>
+            <h2>2017-04-12</h2>
 
             <!-- 5. Contact the speaker -->
-            <h2><a href="http://twitter.com/speaker">@speaker</a></h2>
+            <h2><a href="https://twitter.com/MonikaGlier">@MonikaGlier</a></h2>
         </div>
     </section>
 
+    <section class="slide full-screen">
+      <img src="pictures/wielka-fatra.jpg" alt="sunrise" />
+    </section>
+
+    <section class="slide compact quotes">
+        <h2>Asynchronous Actions</h2>
+        <blockquote>
+            <p>In programming, asynchronous events are those occurring <b>independently of the main program flow</b>. (...) executed in a non-blocking scheme, allowing the main program flow to continue processing.</p>
+        </blockquote>
+        <blockquote>
+            <p>Actions that are triggered by events <b>outside of the direct control of the program</b>, things that come from outside the program. Your code does not generate these events directly.</p>
+        </blockquote>
+        <blockquote>
+            <p>The actions that <b>happen when they happen</b>, not according to a predictable clock.</p>
+        </blockquote>
+    </section>
+
     <section class="slide compact">
-        <h2>TODO: Please update slides:</h2>
+        <h2>Redux</h2>
+        <img id="redux" src="pictures/redux.png" alt="redux"/>
         <ul>
-            <li>rename project at <mark>GitHub</mark> with snake-case convention</li>
-            <li><mark>description</mark> and <mark>link</mark> on GitHub repository profile</li>
-            <li>link to <mark>"Fork me on GitHub"</mark> on the bottom of document</li>
-            <li>setup presentation title in
-                <ul>
-                    <li><mark>&lt;title&gt;</mark> tag on the top of document in <mark>&lt;head&gt;</mark> tag</li>
-                    <li><mark>README.md</mark> file</li>
-                    <li><mark>&lt;h1&gt;</mark> tag at <mark>&lt;header&gt;</mark> tag on the top of document</li>
-                </ul>
-            </li>
+          <li>one big application <mark>store</mark></li>
+          <li>one way data flow</li>
+          <li><mark>actions</mark> dispatched from components</li>
+          <li><mark>reducers</mark> that modify the store</li>
+          <li><mark>components</mark> connected to the store that receive updated state and rerender</li>
+        </ul>
+    </section>
+
+    <section class="slide prism">
+        <h2>Request Actions</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                {
+                  type: ‘CONFIG_REQUEST’,
+                  payload: { id: 89 }
+                }
+
+                // ‘Pending’ action:
+                // => fetching: true, fetched: false
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <h2></h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                {
+                  type: ‘CONFIG_SUCCESS’,
+                  payload: { id: 76, angle: 30° }
+                }
+
+                // 'Success’ action:
+                // => fetching: false, fetched: true
+
+
+                {
+                  type: ‘CONFIG_ERROR’,
+                  payload: { status: 404 }
+                }
+
+                // ‘Failure’ action:
+                // => fetching: false, fetched: false
+
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <h2>redux-thunk</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                // store.js
+
+                import { createStore } from 'redux'
+                const store = createStore(reducer)
+
+                ***
+
+                import { applyMiddleware, createStore } from 'redux'
+                import thunk from "redux-thunk"
+                const middleware = applyMiddleware(thunk)
+                const store = createStore(reducer, middleware)
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <h2>redux-thunk async action creator</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                const fetchConfig = ({ id }) => {
+                  return (dispatch) => {
+                    dispatch(configRequest(id))
+                    return api.fetchConfiguration(id)
+                    .then(({ json }) => dispatch(configSuccess(json)))
+                    .catch((error) => dispatch(configError(error))
+                  }
+                }
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <h2>...with extra promise inside</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                const fetchConfig = ({ id }) => {
+                  return (dispatch) => {
+                    dispatch(configurationRequest(id))
+                    return api.fetchConfiguration(id)
+                    .then(({ json }) => {
+                      new Deserializer({ keyForAttribute: "underscore_case" })
+                      .deserialize(json)
+                      .then((deviceConfig) => dispatch(configSuccess(deviceConfig)))
+                    })
+                    .catch((error) => dispatch(configurationError(error))
+                  }
+                }
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <h2>redux-saga</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                // store.js
+
+                import { createStore } from 'redux'
+                const store = createStore(reducer)
+
+                ***
+
+                import { applyMiddleware, createStore } from 'redux'
+                import createSagaMiddleware from 'redux-saga'
+                const sagaMiddleware = createSagaMiddleware()
+                const middleware = applyMiddleware(sagaMiddleware)
+                const store = createStore(reducer, middleware)
+                sagaMiddleware.run(rootSaga)
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <h2>rootSaga</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                import { takeEvery } from 'redux-saga/effects'
+
+                export function* watchAsync() {
+                  yield takeEvery('CONFIG_REQUEST', configAsync)
+                }
+
+                export default function* rootSaga() {
+                  yield [
+                    watchAsync(),
+                  ]
+                }
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <h2>redux-saga async action generator</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                export function* configAsync(action) {
+                  try {
+                    const { json } = yield call(fetchConfig, action.payload.id)
+                    yield put(configSuccess(json))
+                  } catch (error) {
+                    yield put(configError(error))
+                  }
+                }
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <h2>...with extra promise inside</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+                export function* configAsync(action) {
+                  try {
+                    const { json } = yield call(fetchConfig, action.payload.id)
+                    const config = yield call(deserializeConfig, json)
+                    yield put(configSuccess(config))
+                  } catch (error) {
+                    yield put(configError(response.status))
+                  }
+                }
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide prism">
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code class="small">
+                describe('on response ok', () => {
+                  const configSaga = saga.configAsync(configRequestAction)
+                  it('calls fetch-config with correct params', () => {
+                    const effect = configSaga.next()
+                    expect(effect.done).toEqual(false)
+                    expect(effect.value).toEqual(call(fetchConfig, id))
+                  })
+                  it('puts config-success-action and passes json', () => {
+                    const effect = configSaga.next({ response: responseOk, json: exampleJson })
+                    expect(effect.done).toEqual(false)
+                    expect(effect.value).toEqual(put(configSuccessAction(exampleJson)))
+                  })
+                  it('is done', () => {
+                    const effect = configSaga.next()
+                    expect(effect.done).toEqual(true)
+                    expect(effect.value).toEqual(undefined)
+                  })
+                })
+            </code>
+        </pre>
+    </section>
+
+
+    <section class="slide prism">
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code class="small">
+                describe('on error response', () => {
+                  const configSaga = saga.configAsync(action)
+                  it('calls fetch-config with correct params', () => {
+                    const effect = configSaga.next()
+                    expect(effect.done).toEqual(false)
+                    expect(effect.value).toEqual(call(fetchConfig, id))
+                  })
+                  it('puts config-error-action and passes error', () => {
+                    const effect = configSaga.throw('error')
+                    expect(effect.done).toEqual(false)
+                    expect(effect.value).toEqual(put(actions.configError('error')))
+                  })
+                  it('is done', () => {
+                    const effect = configSaga.next()
+                    expect(effect.done).toEqual(true)
+                    expect(effect.value).toEqual(undefined)
+                  })
+                })
+            </code>
+        </pre>
+    </section>
+
+    <section class="slide compact">
+        <h2>redux-thunk tests</h2>
+        <ul>
+          <li><mark>synone</mark> & it's <mark>spy</mark> method to spy dispatch, <mark>nock</mark> for mocking request</li>
+          <li><mark>jest</mark> & <mark>redux-mock-store</mark> & mocked response</li>
+          <li>...</li>
         </ul>
     </section>
 
     <section class="slide compact">
-        <h2>List Navigation</h2>
-        <ol>
-            <li>Ennui keffiyeh thundercats</li>
-            <li class="next">Jean shorts biodiesel</li>
-            <li class="next">Terry richardson, swag blog</li>
-            <li class="next">Locavore umami vegan helvetica</li>
-            <li class="next">Fingerstache kale chips</li>
-        </ol>
-        <p class="next">Before they sold out master</p>
-    </section>
-
-    <section class="slide compact">
-        <h2>Slide Header</h2>
-
-        <p>Echo Park 8-bit sustainable umami deep v Kickstarter. DIY cliche typewriter brunch, Odd Future sriracha pickled aesthetic. Farm-to-table bespoke fingerstache, kale chips umami brunch letterpress.</p>
-        <p>Whatever authentic disrupt, you probably haven't heard of them direct trade mlkshk Etsy. Gluten-free roof party plaid four loko quinoa.</p>
-        <p class="note">Echo Park 8-bit sustainable umami deep v Kickstarter.</p>
-    </section>
-
-    <section class="slide compact">
-        <h2>Inline Elements</h2>
-
-        <p>Retro meh brunch <a href="">aesthetic</a> Cosby sweater Shoreditch. Banksy Tumblr
-            <strong>sriracha</strong>, flexitarian pug chia master cleanse vinyl
-            <em>wayfarers</em> fanny pack bespoke Helvetica <b>roof</b> party. Messenger bag retro cred
-            <i>Portland</i> next level. Yr stumptown Schlitz Carles deep v small batch. Hella sustainable messenger bag,
-            <mark>leggings</mark>
-            skateboard literally<sup>1</sup> bicycle rights H<sub>2</sub>0 mumblecore banh mi DIY VHS. Semiotics four loko street art asymmetrical. Asymmetrical
-            <code>&lt;paleo&gt;</code> you probably haven’t heard of.
-        </p>
-
-        <footer class="footer">
-            <p>Retro meh brunch <a href="">aesthetic</a> Cosby sweater Shoreditch. Banksy Tumblr
-                <strong>sriracha</strong>, flexitarian pug chia master cleanse vinyl
-                <em>wayfarers</em> fanny pack bespoke Helvetica <b>roof</b> party. Messenger bag retro cred
-                <i>Portland</i> next level. Yr stumptown Schlitz Carles deep v small batch. Hella sustainable messenger bag,
-                <mark>leggings</mark>
-                skateboard literally<sup>1</sup> bicycle rights H<sub>2</sub>0 mumblecore banh mi DIY VHS. Semiotics four loko street art asymmetrical. Asymmetrical
-                <code>&lt;paleo&gt;</code> you probably haven’t heard of.
-            </p>
-        </footer>
-    </section>
-
-    <section class="slide compact">
-        <h2>Columns</h2>
-        <p class="double">Echo Park 8-bit sustainable umami deep v Kickstarter. DIY cliche typewriter brunch, Odd Future sriracha pickled aesthetic. Farm-to-table bespoke fingerstache, kale chips umami brunch American Apparel letterpress. Whatever authentic disrupt, you probably haven't heard of them direct trade mlkshk Etsy. Gluten-free roof party plaid American Apparel four loko quinoa. Echo Park 8-bit sustainable.</p>
-    </section>
-
-    <section class="slide">
-        <h2>Quotes</h2>
-        <blockquote>
-            <p>Flannel bicycle rights locavore selfies skateboard. Authentic fanny pack paleo four loko bespoke. Artisan tattooed chia XOXO ennui, lomo disrupt 8-bit art party Tumblr scenester.</p>
-        </blockquote>
-        <figure>
-            <blockquote>
-                <p>Post-ironic fashion axe flexitarian, Tonx narwhal messenger bag Tumblr. Portland gentrify deep v kale chips literally.</p>
-            </blockquote>
-            <figcaption>Yours Truly</figcaption>
-        </figure>
-    </section>
-
-    <section class="slide compact">
-        <h2>Nested Lists</h2>
-        <ol>
-            <li>Literally viral vegan, ugh drinking vinegar photo booth</li>
-            <li>Wes Anderson chillwave Marfa pour-over Etsy banh mi</li>
-            <li>Ethnic polaroid lo-fi iPhone ennui
-                <ul>
-                    <li>Yr wayfarers before they sold out Kickstarter asymmetrical</li>
-                    <li>Irony flexitarian readymade quinoa, kogi bespoke meggings narwhal</li>
-                    <li>Skateboard Etsy twee artisan Echo Park</li>
-                </ul>
-            </li>
-            <li>Tonx kitsch fingerstache readymade, retro single-origin coffee</li>
-        </ol>
-    </section>
-
-    <section class="slide compact">
-        <h2>Simple Table</h2>
         <table>
             <tr>
-                <th scope="col">Gentrify</th>
-                <th>Twee</th>
-                <th>Artisan</th>
-                <th>Banksy</th>
+                <th>THUNKS</th>
+                <th>SAGAS</th>
             </tr>
             <tr>
-                <th scope="row">Messenger</th>
-                <td>Mixtape</td>
-                <td>Small batch</td>
-                <td>Bicycle rights</td>
+                <td>simplicity</td>
+                <td>better readability of complex actions & complex tests</td>
             </tr>
             <tr>
-                <th scope="row">Meggings</th>
-                <td>Freegan</td>
-                <td>Retro biodiesel</td>
-                <td>Slow-carb</td>
+                <td>good enough for simple apps</td>
+                <td>great testability</td>
             </tr>
             <tr>
-                <th scope="row">Vegan</th>
-                <td>Occupy</td>
-                <td>Normcore</td>
-                <td>Put a bird on it</td>
+                <td>multiple tutorials</td>
+                <td>tutorials</td>
             </tr>
             <tr>
-                <th scope="row">Next level</th>
-                <td>Selfies</td>
-                <td>Sustainable</td>
-                <td>Organic</td>
-            </tr>
-            <tr>
-                <th scope="row">Umami</th>
-                <td>Asymmetrical</td>
-                <td>Keytar</td>
-                <td>Craft beer</td>
-            </tr>
-            <tr>
-                <th scope="row">Biodiesel</th>
-                <td>Haven’t heard</td>
-                <td>Skateboard</td>
-                <td>Farm-to-table</td>
+                <td>tough testing</td>
+                <td>new library to learn to</td>
             </tr>
         </table>
+    </section>
+
+    <section class="slide full-screen">
+      <span class="narrator">...imagine solar panels</span>
+      <img src="pictures/solar-panels.jpeg" alt="Solar Panels" />
+    </section>
+
+    <section class="slide full-screen">
+      <span class="narrator" style="color: white">...imagine a sandstorm</span>
+      <img src="pictures/sandstorm.jpeg" alt="Sandstorm" />
+    </section>
+
+    <section class="slide full-screen">
+      <img class="shout grow" id="boom" src="pictures/boom.png" alt="Boom" />
     </section>
 
     <section class="slide compact">
-        <h2>Striped Table</h2>
-        <table class="striped">
-            <tr>
-                <th scope="col">Gentrify</th>
-                <th>Twee</th>
-                <th>Artisan</th>
-                <th>Banksy</th>
-            </tr>
-            <tr>
-                <th scope="row">Messenger</th>
-                <td>Mixtape</td>
-                <td>Small batch</td>
-                <td>Bicycle rights</td>
-            </tr>
-            <tr>
-                <th scope="row">Meggings</th>
-                <td>Freegan</td>
-                <td>Retro biodiesel</td>
-                <td>Slow-carb</td>
-            </tr>
-            <tr>
-                <th scope="row">Vegan</th>
-                <td>Occupy</td>
-                <td>Normcore</td>
-                <td>Put a bird on it</td>
-            </tr>
-            <tr>
-                <th scope="row">Next level</th>
-                <td>Selfies</td>
-                <td>Sustainable</td>
-                <td>Organic</td>
-            </tr>
-            <tr>
-                <th scope="row">Umami</th>
-                <td>Asymmetrical</td>
-                <td>Keytar</td>
-                <td>Craft beer</td>
-            </tr>
-            <tr>
-                <th scope="row">Biodiesel</th>
-                <td>Haven’t heard</td>
-                <td>Skateboard</td>
-                <td>Farm-to-table</td>
-            </tr>
-        </table>
+        <h2>redux-saga - conclusions</h2>
+        <ul>
+            <li>forced me to organise code better:</li>
+            <ul>
+              <li>actions files contain only simple action creators</li>
+              <li>async 'story' is moved to sagas</li>
+            </ul>
+            <li>code more readable: async actions became simple stories, to be read step by step</li>
+            <li>testing: easier, faster, cleaner = more enjoyable</li>
+            <li>every single person joining the project:</li>
+            <ul>
+              <li>asks where the whole async logic is</li>
+              <li>complains about changes in multiple files</li>
+              <li>is unamused about having to learn yet another library... :)</li>
+            </ul>
+        </ul>
     </section>
 
-    <section class="slide prism">
-        <h2>Listing Slide</h2>
-
-        <pre style="font-size: 45px;" class="language-javascript line-numbers">
-            <code>
-                function wrap(value) {
-                    return function () {
-                        return value;
-                    }
-                }
-
-                function bind(monad, f) {
-                    return f(monad());
-                }
-            </code>
-        </pre>
+    <section class="slide compact">
+        <h2>Resources</h2>
+        <ul class="small">
+          <li>https://github.com/gaearon/redux-thunk</li>
+          <li>https://github.com/redux-saga/redux-saga</li>
+          <li>http://stackoverflow.com/questions/4559032/easy-to-understand-definition-of-asynchronous-event</li>
+          <li>https://medium.com/@iamcherta/testing-async-actions-on-redux-without-following-the-manual-87d7bd804fb8</li>
+          <li>https://medium.com/@ferrannp/unit-testing-with-jest-redux-async-actions-fetch-9054ca28cdcd</li>
+          <li>https://blog.callstack.io/unit-testing-react-native-with-the-new-jest-ii-redux-snapshots-for-your-actions-and-reducers-8559f6f8050b</li>
+        </ul>
     </section>
 
-    <section class="slide prism">
-        <pre style="font-size: 30px;" class="language-javascript line-numbers">
-            <code>
-                var monad = wrap('cookie');
-                bind(monad, (value) => {
-                    console.info(value);
-                    return wrap(value);
-                });
-                monad = bind(monad, (value) => {
-                    return wrap({ type: value });
-                });
-                bind(monad, (value) => {
-                    console.log(value);
-                    return wrap(value);
-                });
-            </code>
-        </pre>
-    </section>
-
-    <section class="slide">
-        <h2 class="shout"><a href="">Linked</a> Shout</h2>
-    </section>
-
-    <section class="slide">
-        <h2 class="shout grow">Effect: Growing Shout</h2>
-    </section>
-
-    <section class="slide">
-        <h2 class="shout shrink">Effect: Shrinking Shout</h2>
-    </section>
-
-    <section class="slide">
-        <figure>
-            <img class="cover" src="vendors/shower-ribbon/pictures/exact.png" alt="">
-            <figcaption class="white">Copyright © 2016 <a href="">Yours Truly</a>, Famous Inc.</figcaption>
-        </figure>
-    </section>
-
-    <section class="slide">
-        <img class="cover" src="vendors/shower-ribbon/pictures/tall.png" alt="">
-    </section>
-
-    <section class="slide">
-        <img class="cover" src="vendors/shower-ribbon/pictures/wide.png" alt="">
-    </section>
-
-    <section class="slide white">
-        <img class="place top left" src="vendors/shower-ribbon/pictures/square.png" alt="">
-        <img class="place top" src="vendors/shower-ribbon/pictures/square.png" alt="">
-        <img class="place top right" src="vendors/shower-ribbon/pictures/square.png" alt="">
-
-        <img class="place left" src="vendors/shower-ribbon/pictures/square.png" alt="">
-        <img class="place" src="vendors/shower-ribbon/pictures/square.png" alt="">
-        <img class="place right" src="vendors/shower-ribbon/pictures/square.png" alt="">
-
-        <img class="place bottom left" src="vendors/shower-ribbon/pictures/square.png" alt="">
-        <img class="place bottom" src="vendors/shower-ribbon/pictures/square.png" alt="">
-        <img class="place bottom right" src="vendors/shower-ribbon/pictures/square.png" alt="">
-    </section>
-
-    <section class="slide" data-timing="00:03">
-        <h3 class="shout">Automatic switch slide after <strong>3 secs</strong> ...</h3>
+    <section class="slide ">
+      <p id="end">Thank you</p>
     </section>
 
     <section class="slide">
@@ -321,10 +381,6 @@
     </section>
 
     <div class="progress"></div>
-
-    <footer class="badge">
-        <a href="https://github.com/warsawjs/warsawjs-slides-template">Fork me on GitHub</a>
-    </footer>
 
     <footer class="badge badge-top-left">
         <a href="#" class="fullscreen">Fullscreen</a>

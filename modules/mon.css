@@ -1,0 +1,47 @@
+.slide.full-screen {
+  padding: 0px;
+}
+
+.slide.full-screen img {
+  display: inherit;
+  margin: auto;
+}
+
+.slide.quotes {
+  padding-left: 90px;
+}
+
+.slide.prism pre[class*="language-"] code {
+  line-height: 30px;
+  font-size: 21px;
+}
+
+.slide.prism pre[class*="language-"] code.small {
+  font-size: 18px;
+}
+
+img#boom {
+  width: 300px;
+  margin-left: 34%;
+}
+
+img#redux {
+  display: inline;
+  float: right;
+}
+
+ul.small li {
+  font-size: 18px;
+}
+
+span.narrator {
+  position: absolute;
+  margin: 50px 0 0 100px;
+}
+
+p#end {
+  font-size: 45px;
+  font-style: italic;
+  margin: 250px 0 0 450px;
+}
+
