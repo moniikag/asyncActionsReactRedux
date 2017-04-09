@@ -83,13 +83,14 @@
         <h2>Request Actions</h2>
         <pre style="font-size: 45px;" class="language-javascript line-numbers">
             <code>
-                {
-                  type: ‘CONFIG_REQUEST’,
-                  payload: { id: 89 }
+                const configRequest = (id) => {
+                  return {
+                    type: ‘CONFIG_REQUEST’,
+                    payload: { id }
+                  }
                 }
 
-                // ‘Pending’ action:
-                // => fetching: true, fetched: false
+                // 'Pending' action => fetching: true, fetched: false
             </code>
         </pre>
     </section>
@@ -98,22 +99,22 @@
         <h2></h2>
         <pre style="font-size: 45px;" class="language-javascript line-numbers">
             <code>
-                {
-                  type: ‘CONFIG_SUCCESS’,
-                  payload: { id: 76, angle: 30° }
+                const configSuccess = (json) => {
+                  return {
+                    type: ‘CONFIG_SUCCESS’,
+                    payload: { json }
+                  }
                 }
-
-                // 'Success’ action:
-                // => fetching: false, fetched: true
+                // 'Success' action => fetching: false, fetched: true
 
 
-                {
-                  type: ‘CONFIG_ERROR’,
-                  payload: { status: 404 }
+                const configError = (error) => {
+                  return {
+                    type: ‘CONFIG_ERROR’,
+                    payload: { error }
+                  }
                 }
-
-                // ‘Failure’ action:
-                // => fetching: false, fetched: false
+                // ‘Failure' action => fetching: false, fetched: false
 
             </code>
         </pre>
@@ -160,7 +161,7 @@
             <code>
                 const fetchConfig = ({ id }) => {
                   return (dispatch) => {
-                    dispatch(configurationRequest(id))
+                    dispatch(configRequest(id))
                     return api.fetchConfiguration(id)
                     .then(({ json }) => {
                       new Deserializer({ keyForAttribute: "underscore_case" })
@@ -244,7 +245,7 @@
                     const config = yield call(deserializeConfig, json)
                     yield put(configSuccess(config))
                   } catch (error) {
-                    yield put(configError(response.status))
+                    yield put(configError(error))
                   }
                 }
             </code>
@@ -255,7 +256,7 @@
         <pre style="font-size: 45px;" class="language-javascript line-numbers">
             <code class="small">
                 describe('on response ok', () => {
-                  const configSaga = saga.configAsync(configRequestAction)
+                  const configSaga = saga.configAsync(exampleConfigRequestAction)
                   it('calls fetch-config with correct params', () => {
                     const effect = configSaga.next()
                     expect(effect.done).toEqual(false)
@@ -264,7 +265,7 @@
                   it('puts config-success-action and passes json', () => {
                     const effect = configSaga.next({ response: responseOk, json: exampleJson })
                     expect(effect.done).toEqual(false)
-                    expect(effect.value).toEqual(put(configSuccessAction(exampleJson)))
+                    expect(effect.value).toEqual(put(configSuccess(exampleJson)))
                   })
                   it('is done', () => {
                     const effect = configSaga.next()
@@ -281,7 +282,7 @@
         <pre style="font-size: 45px;" class="language-javascript line-numbers">
             <code class="small">
                 describe('on error response', () => {
-                  const configSaga = saga.configAsync(action)
+                  const configSaga = saga.configAsync(exampleConfigRequestAction)
                   it('calls fetch-config with correct params', () => {
                     const effect = configSaga.next()
                     expect(effect.done).toEqual(false)
