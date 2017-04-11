@@ -67,6 +67,22 @@
         </blockquote>
     </section>
 
+    <section class="slide prism">
+        <h2>React</h2>
+        <pre style="font-size: 45px;" class="language-javascript line-numbers">
+            <code>
+              componentDidMount() {
+                fetch(url)
+                .then(response => response.json())
+                .then(json => {
+                  this.setState({data: json})
+                })
+                .catch(error => doSomethingWith(error))
+              }
+            </code>
+        </pre>
+    </section>
+
     <section class="slide compact">
         <h2>Redux</h2>
         <img id="redux" src="pictures/redux.png" alt="redux"/>
