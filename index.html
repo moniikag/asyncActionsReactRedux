@@ -101,7 +101,7 @@
             <code>
                 const configRequest = (id) => {
                   return {
-                    type: ‘CONFIG_REQUEST’,
+                    type: 'CONFIG_REQUEST',
                     payload: { id }
                   }
                 }
@@ -117,7 +117,7 @@
             <code>
                 const configSuccess = (json) => {
                   return {
-                    type: ‘CONFIG_SUCCESS’,
+                    type: 'CONFIG_SUCCESS',
                     payload: { json }
                   }
                 }
@@ -126,7 +126,7 @@
 
                 const configError = (error) => {
                   return {
-                    type: ‘CONFIG_ERROR’,
+                    type: 'CONFIG_ERROR',
                     payload: { error }
                   }
                 }
@@ -307,7 +307,7 @@
                   it('puts config-error-action and passes error', () => {
                     const effect = configSaga.throw('error')
                     expect(effect.done).toEqual(false)
-                    expect(effect.value).toEqual(put(actions.configError('error')))
+                    expect(effect.value).toEqual(put(configError('error')))
                   })
                   it('is done', () => {
                     const effect = configSaga.next()
@@ -325,33 +325,26 @@
           <li><mark>nock</mark> for mocking HTTP requests</li>
           <li><mark>redux-mock-store</mark></li>
           <li><mark>store.getActions()</mark> method</li>
-          <li><mark>sinon</mark> & it's <mark>spy</mark> method to spy dispatch
+          </br>
+          <li><mark>sinon</mark> & its <mark>spy</mark> method to spy dispatch
         </ul>
     </section>
 
     <section class="slide compact">
-        <table>
-            <tr>
-                <th>THUNKS</th>
-                <th>SAGAS</th>
-            </tr>
-            <tr>
-                <td>simplicity</td>
-                <td>better readability of complex actions & complex tests</td>
-            </tr>
-            <tr>
-                <td>good enough for simple apps</td>
-                <td>great testability</td>
-            </tr>
-            <tr>
-                <td>multiple tutorials</td>
-                <td>tutorials</td>
-            </tr>
-            <tr>
-                <td>tough testing</td>
-                <td>new library to learn to</td>
-            </tr>
-        </table>
+      THUNKS
+      <ul>
+        <li>simplicity</li>
+        <li>good enough for simple apps</li>
+        <li>multiple tutorials</li>
+        <li>tough testing</li>
+      </ul>
+      SAGAS
+      <ul>
+        <li>better readability of complex actions & complex tests</li>
+        <li>great testability</li>
+        <li>tutorials</li>
+        <li>new library to learn to</li>
+      </ul>
     </section>
 
     <section class="slide full-screen">
@@ -377,7 +370,7 @@
               <li>async 'story' is moved to sagas</li>
             </ul>
             <li>code more readable: async actions became simple stories, to be read step by step</li>
-            <li>testing: easier, faster, cleaner = more enjoyable</li>
+            <li>testing: easier, faster, cleaner === more enjoyable</li>
             <li>every single person joining the project:</li>
             <ul>
               <li>asks where the whole async logic is</li>
